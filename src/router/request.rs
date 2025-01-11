@@ -46,6 +46,11 @@ impl Request {
 
         let rtype = RequestType::try_from(request.method?).ok()?;
         let path = request.path?.to_owned();
+        let path = match path.find('?') {
+            Some(pos) => path.chars().into_iter().take(pos).collect(),
+            None => path,
+        };
+
         let mut headers = HashMap::new();
 
         request.headers.to_vec().iter().for_each(|header| {
