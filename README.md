@@ -1,6 +1,7 @@
-use clang_log::init;
-use http_thing::prelude::*;
-
+# http_thing ⚙️
+a simple library ive written to practise http stuff :3.
+here you create a route like this:
+```rust
 struct PingPongRoute;
 
 impl Route for PingPongRoute {
@@ -20,11 +21,10 @@ impl Route for PingPongRoute {
         }
     }
 }
-
-fn main() {
-    init(log::Level::max(), "pong");
-
-    let mut server = Server::new(6060, 20);
-    server.add_route(PingPongRoute);
-    server.run()
-}
+```
+and then create the server and add the route to it like this:
+```rust
+let mut server = Server::new(6060, 20);
+server.add_route(PingPongRoute);
+server.run()
+```
