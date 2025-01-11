@@ -2,7 +2,7 @@ mod request;
 mod response;
 
 pub use request::{Request, RequestType};
-pub use response::{Response, ResponseBuilder};
+pub use response::Response;
 
 // pub trait Route {
 //     fn request_type(&self) -> RequestType;
