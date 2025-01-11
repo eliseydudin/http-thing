@@ -1,6 +1,8 @@
+mod receiver;
 mod request;
 mod response;
 
+pub use receiver::Receiver;
 pub use request::{Request, RequestType};
 pub use response::Response;
 
