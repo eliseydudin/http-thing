@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 httparse = "1.9.5"
+log = "0.4.24"

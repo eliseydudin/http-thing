@@ -7,6 +7,7 @@ use {
     },
 };
 
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum RequestType {
     Get,
     Post,
