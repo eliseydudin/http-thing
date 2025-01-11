@@ -13,6 +13,8 @@ pub struct Server {
 
 impl Server {
     pub fn new(port: u16, threads: usize) -> Self {
+        log::info!("Running the server on port :{port}");
+
         Self {
             receiver: Receiver::new(port),
             pool: ThreadPool::new(threads),
