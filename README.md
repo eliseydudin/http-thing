@@ -1,5 +1,5 @@
 # http_thing ⚙️
-a simple library ive written to practise http stuff :3.
+a simple library ive written to practise http stuff (and Webbop added to :P) :3.
 here you create a route like this:
 ```rust
 struct PingPongRoute;
@@ -27,4 +27,16 @@ and then create the server and add the route to it like this:
 let mut server = Server::new(6060, 20);
 server.add_route(PingPongRoute);
 server.run()
+```
+## Setting it up
+```
+cargo r --{directory} {file without file extension}
+```
+is the format, ex: 
+```
+cargo r --examples pong
+```
+or:
+```
+cargo r --examples response-test
 ```
