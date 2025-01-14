@@ -17,7 +17,7 @@ impl Route for PingPongRoute {
     fn handler(&mut self) -> fn(Request) -> Response {
         |_req| {
             Response::new()
-                .body(b"pong".to_vec())
+                .body(b"pong")
                 .header("content-type", "text/plain")
         }
     }
@@ -35,7 +35,7 @@ impl Route for RatRoute {
     fn handler(&mut self) -> fn(Request) -> Response {
         |_req| {
             Response::new()
-                .body(include_bytes!("html/rat.html").to_vec())
+                .body(include_bytes!("html/rat.html"))
                 .header("content-type", "text/html")
         }
     }
@@ -58,8 +58,7 @@ impl Route for LostRoute {
                         include_str!("html/404.html"),
                         req.path, req.addr, req.data, req.headers, req.fullpath, req.query
                     )
-                    .as_bytes()
-                    .to_vec(),
+                    .as_bytes(),
                 )
                 .header("content-type", "text/html")
         }
@@ -78,7 +77,7 @@ impl Route for HeaderRoute {
     fn handler(&mut self) -> fn(Request) -> Response {
         |_req| {
             Response::new()
-                .body(format!("{:?}", _req.headers).as_bytes().to_vec())
+                .body(format!("{:?}", _req.headers).as_bytes())
                 .header("content-type", "application/json")
         }
     }

@@ -51,8 +51,8 @@ impl Response {
         self
     }
 
-    pub fn body(mut self, body: Vec<u8>) -> Self {
-        self.body = Some(body);
+    pub fn body(mut self, body: &[u8]) -> Self {
+        self.body = Some(body.to_owned());
         self
     }
 }

@@ -15,7 +15,7 @@ impl Route for PingPongRoute {
     fn handler(&mut self) -> fn(Request) -> Response {
         |_req| {
             Response::new()
-                .body(b"pong".to_vec())
+                .body(b"pong")
                 .header("content-type", "text/plain")
         }
     }
