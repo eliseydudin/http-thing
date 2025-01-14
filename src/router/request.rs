@@ -56,7 +56,7 @@ impl Request {
         let rtype = RequestType::try_from(request.method.ok_or("no method".to_owned())?)?;
         let path = request.path.ok_or("unknown")?.to_owned();
         let path = match path.find('?') {
-            Some(pos) => path.chars().into_iter().take(pos).collect(),
+            Some(pos) => path.chars().take(pos).collect(),
             None => path,
         };
 

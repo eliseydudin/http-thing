@@ -9,12 +9,7 @@ pub struct Response {
 
 impl Response {
     pub fn new() -> Self {
-        Self {
-            status: 200,
-            status_as_str: "OK".to_owned(),
-            headers: HashMap::new(),
-            body: None,
-        }
+        <Self as Default>::default()
     }
 
     pub(crate) fn build(mut self) -> Vec<u8> {
@@ -54,5 +49,16 @@ impl Response {
     pub fn body(mut self, body: &[u8]) -> Self {
         self.body = Some(body.to_owned());
         self
+    }
+}
+
+impl Default for Response {
+    fn default() -> Self {
+        Self {
+            status: 200,
+            status_as_str: "OK".to_owned(),
+            headers: HashMap::new(),
+            body: None,
+        }
     }
 }

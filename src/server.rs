@@ -51,9 +51,8 @@ impl Server {
             self.pool.execute(move || {
                 let response = handler(req);
                 let bytes = response.build();
-                match stream.write(&bytes) {
-                    Err(e) => log::error!("Cannot write to the stream: {e}"),
-                    _ => (),
+                if let Err(e) = stream.write(&bytes) {
+                    log::error!("Cannot write to the stream: {e}")
                 }
             });
         }
