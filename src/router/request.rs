@@ -31,6 +31,8 @@ pub struct Request {
     pub headers: HashMap<String, String>,
     pub data: Vec<u8>,
     pub addr: SocketAddr,
+    pub fullpath: String,
+    pub query: String,
 }
 
 const BUFFER_SIZE: usize = 8 * 1024;
@@ -51,6 +53,9 @@ impl Request {
             Some(pos) => path.chars().into_iter().take(pos).collect(),
             None => path,
         };
+
+        let fullpath = request.path?.to_owned();
+        let query = (request.path?.to_owned())[fullpath.find("?").unwrap_or(fullpath.len())..].to_string();
 
         let mut headers = HashMap::new();
 
@@ -74,6 +79,8 @@ impl Request {
             headers,
             data,
             addr,
+            fullpath,
+            query,
         })
     }
 }

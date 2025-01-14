@@ -63,6 +63,10 @@ impl Server {
         self.router.add_route(route);
     }
 
+    pub fn add_subroute(&mut self, route: impl Route + 'static) {
+        self.router.add_subroute(route);
+    }
+
     pub fn add_default_handler(&mut self, route: impl Route + 'static) {
         self.router.add_default_handler(route);
     }
