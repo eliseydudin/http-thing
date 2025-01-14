@@ -15,7 +15,6 @@ pub trait Route {
 pub struct Router {
     routes: Vec<Box<dyn Route>>,
     default_handler: Option<Box<dyn Route>>,
-    subroutes: Vec<Box<dyn Route>>,
 }
 
 impl Router {
@@ -23,16 +22,11 @@ impl Router {
         Self {
             routes: vec![],
             default_handler: None,
-            subroutes: vec![],
         }
     }
 
     pub fn add_route(&mut self, route: impl Route + 'static) {
         self.routes.push(Box::new(route));
-    }
-
-    pub fn add_subroute(&mut self, route: impl Route + 'static) {
-        self.subroutes.push(Box::new(route));
     }
 
     pub fn add_default_handler(&mut self, route: impl Route + 'static) {
@@ -49,12 +43,6 @@ impl Router {
                 && (route.path() == path || path == format!("{}/", route.path()))
             {
                 return Some(route.handler());
-            }
-        }
-
-        for subroute in &mut self.subroutes {
-            if subroute.request_type() == rtype && path.starts_with(subroute.path()) {
-                return Some(subroute.handler());
             }
         }
 
