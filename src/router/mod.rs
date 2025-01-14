@@ -45,7 +45,9 @@ impl Router {
         rtype: RequestType,
     ) -> Option<fn(Request) -> Response> {
         for route in &mut self.routes {
-            if route.request_type() == rtype && (route.path() == path || path == format!("{}/", route.path())) {
+            if route.request_type() == rtype
+                && (route.path() == path || path == format!("{}/", route.path()))
+            {
                 return Some(route.handler());
             }
         }

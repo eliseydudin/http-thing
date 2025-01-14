@@ -55,7 +55,8 @@ impl Request {
         };
 
         let fullpath = request.path?.to_owned();
-        let query = (request.path?.to_owned())[fullpath.find("?").unwrap_or(fullpath.len())..].to_string();
+        let query =
+            (request.path?.to_owned())[fullpath.find("?").unwrap_or(fullpath.len())..].to_string();
 
         let mut headers = HashMap::new();
 

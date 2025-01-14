@@ -1,11 +1,10 @@
-use clang_log::init;
 use http_thing::prelude::*;
 
-struct PingPongRoute;
-struct RatRoute;
-struct LostRoute;
-struct HeaderRoute;
-struct SongSubRoute;
+pub struct PingPongRoute;
+pub struct RatRoute;
+pub struct LostRoute;
+pub struct HeaderRoute;
+pub struct SongSubRoute;
 
 impl Route for PingPongRoute {
     fn path(&self) -> &'static str {
@@ -55,9 +54,11 @@ impl Route for LostRoute {
     }
 
     fn handler(&mut self) -> fn(Request) -> Response {
-        |_req| {
+        |req| {
             Response::new()
-                .body(format!("<!DOCTYPE html>
+                .body(
+                    format!(
+                        "<!DOCTYPE html>
                 <html><head><title>404</title></head>
                 <body><h1>404</h1><ul>
                 <li>Path: {:#?}</li>
@@ -66,7 +67,12 @@ impl Route for LostRoute {
                 <li>Headers: {:#?}</li>
                 <li>Fullpath: {:#?}</li>
                 <li>Query: {:#?}</li>
-                </ul></body></html>", _req.path, _req.addr, _req.data, _req.headers, _req.fullpath, _req.query).as_bytes().to_vec())
+                </ul></body></html>",
+                        req.path, req.addr, req.data, req.headers, req.fullpath, req.query
+                    )
+                    .as_bytes()
+                    .to_vec(),
+                )
                 .header("content-type", "text/html")
         }
     }
@@ -106,17 +112,4 @@ impl Route for SongSubRoute {
                 .header("content-type", "application/json")
         }
     }
-}
-
-
-fn main() {
-    init(log::Level::max(), "pong");
-
-    let mut server = Server::new(6060, 20);
-    server.add_route(PingPongRoute); // for /ping
-    server.add_route(RatRoute); // for /rat
-    server.add_route(HeaderRoute);
-    server.add_subroute(SongSubRoute);
-    server.add_default_handler(LostRoute); //if page doesn't exist
-    server.run()
 }
