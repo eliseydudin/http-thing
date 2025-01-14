@@ -7,7 +7,7 @@ use routes::*;
 fn main() {
     init(log::Level::max(), "multiple");
 
-    let mut server = Server::new(6060, 20);
+    let mut server = Server::default();
 
     server.add_route(PingPongRoute);
     server.add_route(RatRoute);

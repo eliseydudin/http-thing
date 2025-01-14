@@ -66,3 +66,9 @@ impl Server {
         self.router.add_default_handler(route);
     }
 }
+
+impl Default for Server {
+    fn default() -> Self {
+        Self::new(6060, 20)
+    }
+}
