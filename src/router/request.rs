@@ -14,13 +14,13 @@ pub enum RequestType {
 }
 
 impl<'a> TryFrom<&'a str> for RequestType {
-    type Error = ();
+    type Error = String;
 
     fn try_from(value: &'a str) -> Result<Self, Self::Error> {
         match value {
             "GET" => Ok(Self::Get),
             "POST" => Ok(Self::Post),
-            _ => Err(()),
+            _ => Err("Unknown request method".to_owned()),
         }
     }
 }
@@ -38,25 +38,32 @@ pub struct Request {
 const BUFFER_SIZE: usize = 8 * 1024;
 
 impl Request {
-    pub(crate) fn new(stream: &mut TcpStream, addr: SocketAddr) -> Option<Self> {
+    pub(crate) fn new(stream: &mut TcpStream, addr: SocketAddr) -> Result<Self, String> {
         let mut buffer = [0; BUFFER_SIZE];
-        let size = stream.read(&mut buffer).ok()?;
+        let size = match stream.read(&mut buffer) {
+            Ok(d) => d,
+            Err(e) => return Err(format!("{e}")),
+        };
         let buffer = &buffer[..size];
 
         let mut headers = [EMPTY_HEADER; 100];
         let mut request = HttpRequest::new(&mut headers);
-        let byte_offset = request.parse(buffer).ok()?;
+        let byte_offset = match request.parse(buffer) {
+            Ok(size) => size,
+            Err(e) => return Err(format!("{e}")),
+        };
 
-        let rtype = RequestType::try_from(request.method?).ok()?;
-        let path = request.path?.to_owned();
+        let rtype = RequestType::try_from(request.method.ok_or("no method".to_owned())?)?;
+        let path = request.path.ok_or("unknown")?.to_owned();
         let path = match path.find('?') {
             Some(pos) => path.chars().into_iter().take(pos).collect(),
             None => path,
         };
 
-        let fullpath = request.path?.to_owned();
-        let query =
-            (request.path?.to_owned())[fullpath.find("?").unwrap_or(fullpath.len())..].to_string();
+        let fullpath = request.path.ok_or("no path".to_owned())?.to_owned();
+        let query = (request.path.ok_or("no path".to_owned())?.to_owned())
+            [fullpath.find("?").unwrap_or(fullpath.len())..]
+            .to_string();
 
         let mut headers = HashMap::new();
 
@@ -69,12 +76,12 @@ impl Request {
 
         let byte_offset = match byte_offset {
             httparse::Status::Complete(data) => data,
-            _ => return None,
+            _ => return Err("byte_offset wasn't complete".to_owned()),
         };
 
         let data = buffer[byte_offset..].to_vec();
 
-        Some(Self {
+        Ok(Self {
             rtype,
             path,
             headers,

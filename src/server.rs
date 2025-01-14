@@ -33,9 +33,9 @@ impl Server {
             };
 
             let req = match Request::new(&mut stream, addr) {
-                Some(req) => req,
-                None => {
-                    log::error!("Cannot parse the request");
+                Ok(req) => req,
+                Err(e) => {
+                    log::error!("Cannot parse the request: {e}");
                     continue;
                 }
             };
