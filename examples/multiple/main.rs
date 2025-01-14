@@ -12,7 +12,6 @@ fn main() {
     server.add_route(PingPongRoute);
     server.add_route(RatRoute);
     server.add_route(HeaderRoute);
-    server.add_subroute(SongSubRoute);
     server.add_default_handler(LostRoute);
 
     server.run()
