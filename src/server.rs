@@ -33,9 +33,9 @@ impl Server {
             };
 
             let req = match Request::new(&mut stream, addr) {
-                Some(req) => req,
-                None => {
-                    log::error!("Cannot parse the request");
+                Ok(req) => req,
+                Err(e) => {
+                    log::error!("Cannot parse the request: {e}");
                     continue;
                 }
             };
@@ -51,9 +51,8 @@ impl Server {
             self.pool.execute(move || {
                 let response = handler(req);
                 let bytes = response.build();
-                match stream.write(&bytes) {
-                    Err(e) => log::error!("Cannot write to the stream: {e}"),
-                    _ => (),
+                if let Err(e) = stream.write(&bytes) {
+                    log::error!("Cannot write to the stream: {e}")
                 }
             });
         }
@@ -63,11 +62,13 @@ impl Server {
         self.router.add_route(route);
     }
 
-    pub fn add_subroute(&mut self, route: impl Route + 'static) {
-        self.router.add_subroute(route);
-    }
-
     pub fn add_default_handler(&mut self, route: impl Route + 'static) {
         self.router.add_default_handler(route);
+    }
+}
+
+impl Default for Server {
+    fn default() -> Self {
+        Self::new(6060, 20)
     }
 }
