@@ -1,4 +1,7 @@
+mod addons;
+
 use http_thing::prelude::*;
+use addons::*;
 
 pub struct PingPongRoute;
 pub struct RatRoute;
@@ -56,7 +59,7 @@ impl Route for LostRoute {
                 .body(
                     format!(
                         include_str!("html/404.html"),
-                        req.path, req.addr, req.data, req.headers, req.fullpath, req.query
+                        req.path, req.addr, req.data, req.headers, req.fullpath, req.query, parse_query(&req.query)
                     )
                     .as_bytes(),
                 )
