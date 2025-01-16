@@ -8,15 +8,18 @@ use {
 };
 
 #[derive(PartialEq, Eq, Clone, Copy)]
+#[expect(clippy::module_name_repetitions, reason = "We don't really care here")]
+#[non_exhaustive]
 pub enum RequestType {
     Get,
     Post,
 }
 
-impl<'a> TryFrom<&'a str> for RequestType {
+impl<'st> TryFrom<&'st str> for RequestType {
     type Error = String;
 
-    fn try_from(value: &'a str) -> Result<Self, Self::Error> {
+    #[inline]
+    fn try_from(value: &'st str) -> Result<Self, Self::Error> {
         match value {
             "GET" => Ok(Self::Get),
             "POST" => Ok(Self::Post),
@@ -25,6 +28,7 @@ impl<'a> TryFrom<&'a str> for RequestType {
     }
 }
 
+#[non_exhaustive]
 pub struct Request {
     pub rtype: RequestType,
     pub path: String,
@@ -44,25 +48,26 @@ impl Request {
             Ok(d) => d,
             Err(e) => return Err(format!("{e}")),
         };
+
         let buffer = &buffer[..size];
 
-        let mut headers = [EMPTY_HEADER; 100];
-        let mut request = HttpRequest::new(&mut headers);
+        let mut headers_new = [EMPTY_HEADER; 100];
+        let mut request = HttpRequest::new(&mut headers_new);
         let byte_offset = match request.parse(buffer) {
             Ok(size) => size,
             Err(e) => return Err(format!("{e}")),
         };
 
-        let rtype = RequestType::try_from(request.method.ok_or("no method".to_owned())?)?;
+        let rtype = RequestType::try_from(request.method.ok_or_else(|| "no method".to_owned())?)?;
         let path = request.path.ok_or("unknown")?.to_owned();
         let path = match path.find('?') {
             Some(pos) => path.chars().take(pos).collect(),
             None => path,
         };
 
-        let fullpath = request.path.ok_or("no path".to_owned())?.to_owned();
-        let query = (request.path.ok_or("no path".to_owned())?.to_owned())
-            [fullpath.find("?").unwrap_or(fullpath.len())..]
+        let fullpath = request.path.ok_or_else(|| "no path".to_owned())?.to_owned();
+        let query = (request.path.ok_or_else(|| "no path".to_owned())?.to_owned())
+            [fullpath.find('?').unwrap_or(fullpath.len())..]
             .to_string();
 
         let mut headers = HashMap::new();
@@ -74,12 +79,11 @@ impl Request {
             );
         });
 
-        let byte_offset = match byte_offset {
-            httparse::Status::Complete(data) => data,
-            _ => return Err("byte_offset wasn't complete".to_owned()),
+        let httparse::Status::Complete(byte_offset_new) = byte_offset else {
+            return Err("byte_offset wasn't complete".to_owned());
         };
 
-        let data = buffer[byte_offset..].to_vec();
+        let data = buffer.get(byte_offset_new..).unwrap_or_default().to_vec();
 
         Ok(Self {
             rtype,

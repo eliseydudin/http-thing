@@ -25,28 +25,39 @@ impl Router {
         }
     }
 
-    pub fn add_route(&mut self, route: impl Route + 'static) {
+    pub fn add_route<R>(&mut self, route: R)
+    where
+        R: Route + 'static,
+    {
         self.routes.push(Box::new(route));
     }
 
-    pub fn add_default_handler(&mut self, route: impl Route + 'static) {
+    pub fn add_default_handler<R>(&mut self, route: R)
+    where
+        R: Route + 'static,
+    {
         self.default_handler = Some(Box::new(route));
     }
 
-    pub fn find_handler(
+    pub fn find_handler<S>(
         &mut self,
-        path: String,
+        path: S,
         rtype: RequestType,
-    ) -> Option<fn(Request) -> Response> {
+    ) -> Option<fn(Request) -> Response>
+    where
+        S: Into<String>,
+    {
+        let path_s: String = path.into();
+
         for route in &mut self.routes {
             if route.request_type() == rtype
-                && (route.path() == path || path == format!("{}/", route.path()))
+                && (route.path() == path_s || path_s == format!("{}/", route.path()))
             {
                 return Some(route.handler());
             }
         }
 
-        if let Some(h) = &mut self.default_handler {
+        if let Some(ref mut h) = self.default_handler {
             return Some(h.handler());
         }
 

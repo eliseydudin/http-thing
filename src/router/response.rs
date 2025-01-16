@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    fmt::{self, Write as _},
+};
 
 pub struct Response {
     status: u16,
@@ -7,45 +10,70 @@ pub struct Response {
     body: Option<Vec<u8>>,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("data store disconnected")]
+    WriteError(#[from] fmt::Error),
+}
+
 impl Response {
+    #[inline]
+    #[must_use]
     pub fn new() -> Self {
         <Self as Default>::default()
     }
 
-    pub(crate) fn build(mut self) -> Vec<u8> {
+    pub(crate) fn build(mut self) -> Result<Vec<u8>, Error> {
         let mut buffer = String::new();
-        buffer += &format!("HTTP/1.1 {} {}\r\n", self.status, self.status_as_str);
-        for (header, data) in self.headers {
-            buffer += &format!("{header}: {data}\r\n");
-        }
+        write!(
+            &mut buffer,
+            "HTTP/1.1 {} {}\r\n",
+            self.status, self.status_as_str
+        )?;
+
+        self.headers.iter().for_each(|(header, data)| {
+            if let Err(e) = write!(buffer, "{header}: {data}\r\n") {
+                log::error!("Cannot write to the buffer! {e}");
+            }
+        });
 
         if self.body.is_some() {
             let mut size = 0;
             self.body = self.body.inspect(|v| size = v.len());
-            buffer += &format!("content-length: {}\r\n", size);
+            write!(buffer, "content-length: {size}\r\n")?;
         }
 
         buffer += "\r\n";
-        let mut buffer = buffer.as_bytes().to_vec();
+        let mut buffer_bytes = buffer.as_bytes().to_vec();
 
         if let Some(mut body) = self.body {
-            buffer.append(&mut body);
+            buffer_bytes.append(&mut body);
         }
 
-        buffer
+        Ok(buffer_bytes)
     }
 
-    pub fn header(mut self, header: impl Into<String>, data: impl Into<String>) -> Self {
+    #[inline]
+    #[must_use]
+    pub fn header<S1, S2>(mut self, header: S1, data: S2) -> Self
+    where
+        S1: Into<String>,
+        S2: Into<String>,
+    {
         self.headers.insert(header.into(), data.into());
         self
     }
 
-    pub fn status(mut self, status: u16, as_str: impl Into<String>) -> Self {
+    #[must_use]
+    #[inline]
+    pub fn status<S: Into<String>>(mut self, status: u16, as_str: S) -> Self {
         self.status = status;
         self.status_as_str = as_str.into();
         self
     }
 
+    #[must_use]
+    #[inline]
     pub fn body(mut self, body: &[u8]) -> Self {
         self.body = Some(body.to_owned());
         self
@@ -53,6 +81,7 @@ impl Response {
 }
 
 impl Default for Response {
+    #[inline]
     fn default() -> Self {
         Self {
             status: 200,

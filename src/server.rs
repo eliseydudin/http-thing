@@ -12,6 +12,8 @@ pub struct Server {
 }
 
 impl Server {
+    #[inline]
+    #[must_use]
     pub fn new(port: u16, threads: usize) -> Self {
         log::info!("Running the server on port :{port}");
 
@@ -22,14 +24,12 @@ impl Server {
         }
     }
 
+    #[inline]
     pub fn run(&mut self) -> ! {
         loop {
-            let (mut stream, addr) = match self.receiver.next_request() {
-                Some(n) => n,
-                None => {
-                    log::error!("Cannot receive the next request");
-                    continue;
-                }
+            let Some((mut stream, addr)) = self.receiver.next_request() else {
+                log::error!("Cannot receive the next request");
+                continue;
             };
 
             let req = match Request::new(&mut stream, addr) {
@@ -40,34 +40,47 @@ impl Server {
                 }
             };
 
-            let handler = match self.router.find_handler(req.path.clone(), req.rtype) {
-                Some(h) => h,
-                None => {
-                    log::error!("No handler found for this request");
-                    continue;
-                }
+            let Some(handler) = self.router.find_handler(req.path.clone(), req.rtype) else {
+                log::error!("No handler found for this request");
+                continue;
             };
 
             self.pool.execute(move || {
                 let response = handler(req);
-                let bytes = response.build();
+                let bytes = match response.build() {
+                    Ok(b) => b,
+                    Err(e) => {
+                        log::error!("Failed building the response: {e}");
+                        return;
+                    }
+                };
+
                 if let Err(e) = stream.write(&bytes) {
-                    log::error!("Cannot write to the stream: {e}")
+                    log::error!("Cannot write to the stream: {e}");
                 }
             });
         }
     }
 
-    pub fn add_route(&mut self, route: impl Route + 'static) {
+    #[inline]
+    pub fn add_route<R>(&mut self, route: R)
+    where
+        R: Route + 'static,
+    {
         self.router.add_route(route);
     }
 
-    pub fn add_default_handler(&mut self, route: impl Route + 'static) {
+    #[inline]
+    pub fn add_default_handler<R>(&mut self, route: R)
+    where
+        R: Route + 'static,
+    {
         self.router.add_default_handler(route);
     }
 }
 
 impl Default for Server {
+    #[inline]
     fn default() -> Self {
         Self::new(6060, 20)
     }
