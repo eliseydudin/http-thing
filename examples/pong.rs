@@ -15,7 +15,7 @@ impl Route for PingPongRoute {
     fn handler(&mut self) -> fn(Request) -> Response {
         |_req| {
             Response::new()
-                .body(b"pong".to_vec())
+                .body(b"pong")
                 .header("content-type", "text/plain")
         }
     }
@@ -24,7 +24,7 @@ impl Route for PingPongRoute {
 fn main() {
     init(log::Level::max(), "pong");
 
-    let mut server = Server::new(6060, 20);
+    let mut server = Server::default();
     server.add_route(PingPongRoute);
     server.run()
 }
