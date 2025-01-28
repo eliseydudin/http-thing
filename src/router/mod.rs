@@ -9,7 +9,7 @@ pub use request::{Request, RequestType};
 pub use response::Response;
 
 pub trait Route {
-    const ACCEPTED_REQUEST: RequestType;
+    const RTYPE: RequestType;
     const PATH: &'static str;
 
     fn handler(&mut self) -> fn(Request) -> Response;
@@ -34,7 +34,7 @@ impl Router {
     where
         R: Route + 'static,
     {
-        let handler = (R::ACCEPTED_REQUEST, R::PATH);
+        let handler = (R::RTYPE, R::PATH);
         self.routes.insert(handler, route.handler());
     }
 

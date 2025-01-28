@@ -4,7 +4,7 @@ use http_router::prelude::*;
 struct PingPongRoute;
 
 impl Route for PingPongRoute {
-    const ACCEPTED_REQUEST: RequestType = RequestType::Get;
+    const RTYPE: RequestType = RequestType::Get;
     const PATH: &str = "/ping";
 
     fn handler(&mut self) -> fn(Request) -> Response {
