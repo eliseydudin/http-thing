@@ -7,8 +7,7 @@ use {
     },
 };
 
-#[derive(PartialEq, Eq, Clone, Copy)]
-#[expect(clippy::module_name_repetitions, reason = "We don't really care here")]
+#[derive(PartialEq, Eq, Clone, Copy, Hash)]
 #[non_exhaustive]
 pub enum RequestType {
     Get,
