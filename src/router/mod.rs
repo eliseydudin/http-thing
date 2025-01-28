@@ -54,12 +54,10 @@ impl Router {
         S: Into<String>,
     {
         let path_s: String = path.into();
-
-        for (query, route) in &mut self.routes {
-            if query.0 == rtype && query.1 == path_s {
-                return Some(*route);
-            }
-        }
+        match self.routes.get(&(rtype, path_s.as_str())) {
+            Some(route) => return Some(*route),
+            None => (),
+        };
 
         if let Some(ref mut h) = self.default_handler {
             return Some(*h);
