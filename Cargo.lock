@@ -33,7 +33,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "http-thing"
+name = "http-router"
 version = "0.1.0"
 dependencies = [
  "clang_log",

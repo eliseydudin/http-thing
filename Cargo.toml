@@ -1,5 +1,5 @@
 [package]
-name = "http-thing"
+name = "http-router"
 version = "0.1.0"
 edition = "2021"
 description = "Simple HTTP routing"

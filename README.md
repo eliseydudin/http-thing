@@ -1,6 +1,5 @@
-# http_thing ⚙️
-a simple library ive written to practise http stuff :3.
-here you create a route like this:
+# http_router ⚙️
+a simple library for routing!
 ```rust
 struct PingPongRoute;
 
