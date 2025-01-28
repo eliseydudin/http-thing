@@ -4,20 +4,11 @@ a simple library for routing!
 struct PingPongRoute;
 
 impl Route for PingPongRoute {
-    fn path(&self) -> &'static str {
-        "/ping"
-    }
-
-    fn request_type(&self) -> RequestType {
-        RequestType::Get
-    }
+    const RTYPE: RequestType = RequestType::Get;
+    const PATH: &str = "/ping";
 
     fn handler(&mut self) -> fn(Request) -> Response {
-        |_req| {
-            Response::new()
-                .body(b"pong".to_vec())
-                .header("content-type", "text/plain")
-        }
+        |_req| Response::new().body(b"pong")
     }
 }
 ```
